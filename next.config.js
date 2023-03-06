@@ -7,30 +7,21 @@ module.exports = {
   images: {
     domains: ["courses-top.ru"],
   },
-  webpack(config, options) {
+  webpack(config) {
+    const { options: loaderOptions } = config.module.rules.find((rule) => rule.test && rule.test.test(".svg"));
     config.module.rules.push({
-      loader: "@svgr/webpack",
+      test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
-      options: {
-        prettier: false,
-        svgo: true,
-        svgoConfig: {
-          plugins: [
-            {
-              name: "preset-default",
-              params: {
-                override: {
-                  removeViewBox: false,
-                },
-              },
-            },
-          ],
-        },
-        titleProp: true,
-      },
-      test: /\.svg$/,
+      resourceQuery: /icon/,
+      use: ["@svgr/webpack"],
     });
-
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      resourceQuery: { not: [/icon/] },
+      loader: "next-image-loader",
+      options: loaderOptions,
+    });
     return config;
   },
 };
