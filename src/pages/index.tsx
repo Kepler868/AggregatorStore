@@ -5,8 +5,35 @@ import styles from "../styles/Home.module.css";
 import { Button, Htag, P, Rating, Tag } from "../components";
 import { useState } from "react";
 import { withLayout } from "../layout/Layout";
+import axios from "axios";
+import { GetStaticProps } from "next";
+import { MenuItem } from "../interfaces/menu.interface";
 
-export function Home(): JSX.Element {
+
+interface HomeProps extends Record<string, unknown> {
+  menu: MenuItem[];
+  firstCategory: number;
+}
+
+export const getStaticProps = async () => {
+  const firstCategory = 0;
+  const { data: menu } = await axios.post<MenuItem[]>(
+    process.env.NEXT_PUBLIC_DOMAIN + "/api/top-page/find",
+    { firstCategory }
+  );
+
+  return {
+    props: {
+      menu,
+      firstCategory,
+    },
+  };
+};
+
+
+export default withLayout(Home);
+
+export function Home({ menu }: HomeProps): JSX.Element {
   const [rating, setRating] = useState<number>(4);
   return (
     <>
@@ -28,8 +55,14 @@ export function Home(): JSX.Element {
       </Tag>
       <Tag color="primary">dfb</Tag>
       <Rating rating={rating} setRating={setRating} isEditable />
+      <ul>
+        {menu.map((m) => (
+          <li key={m._id.secondCategory}>{m._id.secondCategory}</li>
+        ))}
+      </ul>
     </>
   );
 }
 
-export default withLayout(Home);
+
+
